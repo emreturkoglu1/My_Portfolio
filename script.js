@@ -157,13 +157,49 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initial check for elements in view
     fadeIn();
     
+    // EmailJS initialization
+    // Replace 'YOUR_PUBLIC_KEY' with your actual EmailJS public key
+    emailjs.init("_quEQtaIhz4rpedo0");
+    
     // Handle contact form submission
     const contactForm = document.getElementById('contactForm');
     if (contactForm) {
         contactForm.addEventListener('submit', function(e) {
             e.preventDefault();
-            alert('Teşekkürler! Mesajınız alınmıştır. En kısa sürede dönüş yapacağım.');
-            contactForm.reset();
+            
+            // Show loading state
+            const submitButton = contactForm.querySelector('button[type="submit"]');
+            const originalButtonText = submitButton.textContent;
+            submitButton.textContent = "Gönderiliyor...";
+            submitButton.disabled = true;
+            
+            // Prepare template parameters
+            const templateParams = {
+                from_name: document.getElementById('name').value,
+                email_id: document.getElementById('email').value,
+                subject: document.getElementById('subject').value,
+                message: document.getElementById('message').value
+            };
+            
+            // Replace these with your actual EmailJS service ID and template ID
+            emailjs.send('service_nzh0qe2', 'template_q9ybmjk', templateParams)
+                .then(function(response) {
+                    // Success message
+                    alert('Teşekkürler! Mesajınız başarıyla gönderildi. En kısa sürede dönüş yapacağım.');
+                    contactForm.reset();
+                    
+                    // Reset button
+                    submitButton.textContent = originalButtonText;
+                    submitButton.disabled = false;
+                }, function(error) {
+                    // Error message
+                    console.error('Email gönderimi başarısız:', error);
+                    alert('Mesajınız gönderilirken bir hata oluştu. Lütfen daha sonra tekrar deneyin veya direkt e-posta ile iletişime geçin.');
+                    
+                    // Reset button
+                    submitButton.textContent = originalButtonText;
+                    submitButton.disabled = false;
+                });
         });
     }
 });
