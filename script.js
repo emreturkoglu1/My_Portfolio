@@ -49,12 +49,11 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     });
 });
 
-// Scroll Animation
+// Scroll Animation - FIXED
 const scrollElements = document.querySelectorAll('.project-card, .about-content, .contact-content');
 
 const elementInView = (el, percentageScroll = 100) => {
     const elementTop = el.getBoundingClientRect().top;
-    const elementHeight = el.getBoundingClientRect().height;
     
     return (
         elementTop <= 
@@ -64,19 +63,17 @@ const elementInView = (el, percentageScroll = 100) => {
 
 const displayScrollElement = (element) => {
     element.classList.add('scrolled');
-};
-
-const hideScrollElement = (element) => {
-    element.classList.remove('scrolled');
+    // Ensure element stays visible
+    element.style.opacity = "1";
+    element.style.transform = "translateY(0)";
 };
 
 const handleScrollAnimation = () => {
     scrollElements.forEach((el) => {
         if (elementInView(el, 80)) {
             displayScrollElement(el);
-        } else {
-            hideScrollElement(el);
         }
+        // Removed the else condition that was hiding elements
     });
 };
 
@@ -87,6 +84,12 @@ window.addEventListener('scroll', () => {
 
 window.addEventListener('load', () => {
     handleScrollAnimation();
+    // Make all elements visible on load
+    document.querySelectorAll('.fade-in').forEach(el => {
+        el.classList.add('active');
+        el.style.opacity = "1";
+        el.style.transform = "translateY(0)";
+    });
 });
 
 // Form Submission
@@ -120,17 +123,12 @@ if (contactForm) {
     });
 }
 
-// Add CSS class when element is in viewport for animations
-const fadeInElements = document.querySelectorAll('.fade-in');
-
+// Simplified fade-in function to ensure elements stay visible
 const fadeIn = () => {
-    fadeInElements.forEach(element => {
-        const elementPosition = element.getBoundingClientRect().top;
-        const screenPosition = window.innerHeight / 1.3;
-        
-        if (elementPosition < screenPosition) {
-            element.classList.add('active');
-        }
+    document.querySelectorAll('.fade-in').forEach(element => {
+        element.classList.add('active');
+        element.style.opacity = "1";
+        element.style.transform = "translateY(0)";
     });
 };
 
