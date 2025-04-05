@@ -1,11 +1,22 @@
-// Mobile Navigation
+// Mobile Navigation - Improved Version
 const burger = document.querySelector('.burger');
 const nav = document.querySelector('.nav-links');
 const navLinks = document.querySelectorAll('.nav-links li');
+const body = document.querySelector('body');
 
 burger.addEventListener('click', () => {
     // Toggle Nav
     nav.classList.toggle('nav-active');
+    
+    // Toggle body scroll
+    if (nav.classList.contains('nav-active')) {
+        body.style.overflow = 'hidden'; // Prevent background scrolling
+    } else {
+        body.style.overflow = 'auto';
+    }
+    
+    // Burger Animation
+    burger.classList.toggle('active');
     
     // Animate Links
     navLinks.forEach((link, index) => {
@@ -15,9 +26,21 @@ burger.addEventListener('click', () => {
             link.style.animation = `navLinkFade 0.5s ease forwards ${index / 7 + 0.3}s`;
         }
     });
-    
-    // Burger Animation
-    burger.classList.toggle('toggle');
+});
+
+// Close mobile menu when clicking outside or on a link
+document.addEventListener('click', (e) => {
+    if (nav.classList.contains('nav-active') && 
+        !nav.contains(e.target) && 
+        !burger.contains(e.target)) {
+        nav.classList.remove('nav-active');
+        burger.classList.remove('active');
+        body.style.overflow = 'auto';
+        
+        navLinks.forEach(link => {
+            link.style.animation = '';
+        });
+    }
 });
 
 // Close mobile menu when clicking on a nav link
@@ -25,7 +48,8 @@ navLinks.forEach(link => {
     link.addEventListener('click', () => {
         if (nav.classList.contains('nav-active')) {
             nav.classList.remove('nav-active');
-            burger.classList.remove('toggle');
+            burger.classList.remove('active');
+            body.style.overflow = 'auto';
             
             navLinks.forEach(link => {
                 link.style.animation = '';
@@ -34,7 +58,23 @@ navLinks.forEach(link => {
     });
 });
 
-// Smooth Scrolling
+// Add animation for nav links
+document.head.insertAdjacentHTML('beforeend', `
+    <style>
+        @keyframes navLinkFade {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+    </style>
+`);
+
+// Smooth Scrolling - Improved for Mobile
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function (e) {
         e.preventDefault();
@@ -42,10 +82,15 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         const targetId = this.getAttribute('href');
         const targetElement = document.querySelector(targetId);
         
-        window.scrollTo({
-            top: targetElement.offsetTop - 70, // Account for fixed header
-            behavior: 'smooth'
-        });
+        if (targetElement) {
+            // Get header height for proper scrolling position
+            const headerHeight = document.querySelector('header').offsetHeight;
+            
+            window.scrollTo({
+                top: targetElement.offsetTop - headerHeight,
+                behavior: 'smooth'
+            });
+        }
     });
 });
 
@@ -68,15 +113,6 @@ const displayScrollElement = (element) => {
     element.style.transform = "translateY(0)";
 };
 
-const handleScrollAnimation = () => {
-    scrollElements.forEach((el) => {
-        if (elementInView(el, 80)) {
-            displayScrollElement(el);
-        }
-        // Removed the else condition that was hiding elements
-    });
-};
-
 // Initialize
 window.addEventListener('scroll', () => {
     handleScrollAnimation();
@@ -90,38 +126,12 @@ window.addEventListener('load', () => {
         el.style.opacity = "1";
         el.style.transform = "translateY(0)";
     });
+    
+    // Fix iOS initial scroll issue
+    setTimeout(() => {
+        window.scrollTo(0, 0);
+    }, 100);
 });
-
-// Form Submission
-const contactForm = document.getElementById('contactForm');
-
-if (contactForm) {
-    contactForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        // Form validation
-        const name = document.getElementById('name').value;
-        const email = document.getElementById('email').value;
-        const subject = document.getElementById('subject').value;
-        const message = document.getElementById('message').value;
-        
-        if (!name || !email || !subject || !message) {
-            alert('Lütfen tüm alanları doldurun.');
-            return;
-        }
-        
-        // Basic email validation
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
-            alert('Lütfen geçerli bir e-posta adresi girin.');
-            return;
-        }
-        
-        // Normally would send to a server here
-        alert('Teşekkürler! Mesajınız gönderildi. En kısa sürede size dönüş yapacağım.');
-        contactForm.reset();
-    });
-}
 
 // Simplified fade-in function to ensure elements stay visible
 const fadeIn = () => {
@@ -146,4 +156,33 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Initial check for elements in view
     fadeIn();
-}); 
+    
+    // Handle contact form submission
+    const contactForm = document.getElementById('contactForm');
+    if (contactForm) {
+        contactForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Teşekkürler! Mesajınız alınmıştır. En kısa sürede dönüş yapacağım.');
+            contactForm.reset();
+        });
+    }
+});
+
+// Fix viewport issues on mobile
+function updateViewportHeight() {
+    let vh = window.innerHeight * 0.01;
+    document.documentElement.style.setProperty('--vh', `${vh}px`);
+}
+
+// Run initially and on resize
+updateViewportHeight();
+window.addEventListener('resize', updateViewportHeight);
+
+// Define the handleScrollAnimation function
+const handleScrollAnimation = () => {
+    scrollElements.forEach((el) => {
+        if (elementInView(el, 80)) {
+            displayScrollElement(el);
+        }
+    });
+}; 
